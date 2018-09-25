@@ -168,7 +168,7 @@ def ffmpeg_metadata(args, log, filename):
             metadata[key] = value
 
     # Parse chapters
-    re_chapter = re.compile('^#[\d\.]+: start ([\d|\.]+), end ([\d|\.]+)[\s]+Metadata:[\s]+title[\s]+: (.*)')
+    re_chapter = re.compile('^#[\d:]+: start ([\d|\.]+), end ([\d|\.]+)[\s]+Metadata:[\s]+title[\s]+: (.*)')
     n = 1
     for raw_chapter in raw_chapters:
         m = re.match(re_chapter, raw_chapter.strip())
@@ -292,11 +292,11 @@ def split(args, log, output_dir, encoded_file, chapters):
         if sys.platform.startswith('win'):
             fname = os.path.join(output_dir, '_tmp_%d.%s' % (chapter.num, args.ext))
         else:
-            fname = os.path.join(output_dir, '%s.%s' % (chapter_name, args.ext))
+            fname = os.path.join(unicode(output_dir, 'utf-8'), '%s.%s' % (chapter_name, args.ext))
 
         values = dict(ffmpeg=args.ffmpeg, duration=str(chapter.duration()),
-            start=str(chapter.start), outfile=encoded_file, infile=fname)
-        split_cmd = '%(ffmpeg)s -y -acodec copy -t %(duration)s -ss %(start)s -i %(outfile)s %(infile)s'
+            start=str(chapter.start), outfile=encoded_file, infile=fname.encode('utf-8'))
+        split_cmd = '%(ffmpeg)s -i %(outfile)s -y -acodec copy -t %(duration)s -ss %(start)s %(infile)s'
 
         log.info("Splitting chapter %2d/%2d '%s'..." % (chapter.num, len(chapters), chapter_name))
         log.debug('Splitting with command: %s' % (split_cmd % values))
